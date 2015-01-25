@@ -10,8 +10,7 @@
  *
  */
 
-#define LOG_NDEBUG 0
-#include "driver_nl80211.h"
+#include "hardware_legacy/driver_nl80211.h"
 #include "wpa_supplicant_i.h"
 #include "config.h"
 #ifdef ANDROID
@@ -344,9 +343,12 @@ int wpa_driver_nl80211_driver_cmd(void *priv, char *cmd, char *buf,
 			    (os_strncasecmp(cmd, "WLS_BATCHING", 12) == 0))
 				ret = strlen(buf);
 			else if ((os_strncasecmp(cmd, "COUNTRY", 7) == 0) ||
-				 (os_strncasecmp(cmd, "SETBAND", 7) == 0))
+				 (os_strncasecmp(cmd, "SETBAND", 7) == 0)) {
+				union wpa_event_data event;
+				memset(&event, 0, sizeof(event));
 				wpa_supplicant_event(drv->ctx,
-					EVENT_CHANNEL_LIST_CHANGED, NULL);
+					EVENT_CHANNEL_LIST_CHANGED, &event);
+			}
 			wpa_printf(MSG_DEBUG, "%s %s len = %d, %d", __func__, buf, ret, strlen(buf));
 		}
 	}
